@@ -12,35 +12,24 @@
     <div id="main-container">
         <h1>Music Listening Room</h1>
 
-        <!-- Room join section -->
+        <!-- Room join section (hidden after user joins the room) -->
         <div id="join-container">
-            <input type="text" id="username" placeholder="Enter your name">
-            <input type="text" id="room" placeholder="Enter room name">
+            <input type="text" id="username" placeholder="Enter your name" />
+            <input type="text" id="room" placeholder="Enter room name" />
             <button id="join-room">Join Room</button>
         </div>
 
-        <!-- Playlist section (hidden initially) -->
+        <!-- Playlist section (visible after user joins) -->
         <div id="playlist-container" style="display: none;">
             <h2>You're in the room: <span id="room-name"></span></h2>
             <div id="music-container">
-                <iframe
-                    id="spotify-player"
-                    title="Spotify Playlist"
-                    src="https://open.spotify.com/embed/playlist/00IvCvQNm1guhv19gSc5ef?utm_source=generator&theme=0"
-                    width="100%" height="360" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy">
+                <iframe id="spotify-player" title="Spotify Playlist"
+                        src="https://open.spotify.com/embed/playlist/00IvCvQNm1guhv19gSc5ef?utm_source=generator&theme=0"
+                        width="100%" height="360" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy">
                 </iframe>
             </div>
         </div>
-
-        <!-- Messages Section -->
-        <div id="room-container">
-            <h2>Chat Room</h2>
-            <ul id="messages"></ul>
-            <input type="text" id="chat-input" placeholder="Type your message...">
-            <button id="send-message">Send</button>
-        </div>
-
     </div>
 
     <!-- Include the Socket.IO client library -->
