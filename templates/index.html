@@ -1,41 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+const socket = io(); // Connect to the server using Socket.IO
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+let currentRoom = ''; // Store the current room
+let playerState = 'paused'; // Track current state of the music (play or pause)
 
-<body>
-    <div id="main-container">
-        <h1>Music Listening Room</h1>
+// Emit the 'join' event when a user joins a room
+document.getElementById('join-room').addEventListener('click', () => {
+    const username = document.getElementById('username').value;
+    const room = document.getElementById('room').value;
 
-        <!-- Room join section (hidden after user joins the room) -->
-        <div id="join-container">
-            <input type="text" id="username" placeholder="Enter your name" />
-            <input type="text" id="room" placeholder="Enter room name" />
-            <button id="join-room">Join Room</button>
-        </div>
+    if (username && room) {
+        // Emit a 'join' event to the server
+        socket.emit('join', { username, room });
 
-        <!-- Playlist section (visible after user joins) -->
-        <div id="playlist-container" style="display: none;">
-            <h2>You're in the room: <span id="room-name"></span></h2>
-            <div id="music-container">
-                <iframe id="spotify-player" title="Spotify Playlist"
-                        src="https://open.spotify.com/embed/playlist/00IvCvQNm1guhv19gSc5ef?utm_source=generator&theme=0"
-                        width="100%" height="360" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy">
-                </iframe>
-            </div>
-        </div>
-    </div>
+        currentRoom = room; // Store the current room
 
-    <!-- Include the Socket.IO client library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.min.js"></script>
-    <!-- Include custom JS script -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
+        // Show the playlist after joining
+        document.getElementById('join-container').style.display = 'none';
+        document.getElementById('music-container').style.display = 'block';
+    } else {
+        alert('Please enter both a username and a room.');
+    }
+});
 
-</html>
+// Listen for state changes (play, pause) from other users
+socket.on('player-state-change', (data) => {
+    if (data.room === currentRoom) {
+        if (data.action === 'play') {
+            document.getElementById('spotify-player').contentWindow.postMessage('{"method":"play"}', '*');
+            playerState = 'playing';
+        } else if (data.action === 'pause') {
+            document.getElementById('spotify-player').contentWindow.postMessage('{"method":"pause"}', '*');
+            playerState = 'paused';
+        }
+    }
+});
+
+// Function to emit play/pause action to the server
+function syncPlayerState(action) {
+    socket.emit('player-state-change', {
+        action,
+        room: currentRoom,
+    });
+}
+
+// Play button listener
+document.getElementById('play-button').addEventListener('click', () => {
+    if (playerState === 'paused') {
+        syncPlayerState('play');
+        playerState = 'playing';
+    }
+});
+
+// Pause button listener
+document.getElementById('pause-button').addEventListener('click', () => {
+    if (playerState === 'playing') {
+        syncPlayerState('pause');
+        playerState = 'paused';
+    }
+});
